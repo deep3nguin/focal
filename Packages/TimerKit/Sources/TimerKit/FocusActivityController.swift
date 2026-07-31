@@ -3,7 +3,7 @@ import Foundation
 #if canImport(ActivityKit) && os(iOS)
 import ActivityKit
 
-public struct FocusActivityAttributes: ActivityAttributes {
+public struct FocusActivityAttributes: ActivityAttributes, Sendable {
     public struct ContentState: Codable, Hashable, Sendable {
         public var endDate: Date
         public var isPaused: Bool
@@ -46,18 +46,24 @@ public final class FocusActivityController {
         #endif
     }
 
-    public func pause(currentRemainingDate: Date) async {
+    public func pause(currentRemainingDate: Date) {
         #if canImport(ActivityKit) && os(iOS)
-        guard let activity else { return }
+        guard let activity = self.activity else { return }
         let state = FocusActivityAttributes.ContentState(endDate: currentRemainingDate, isPaused: true)
-        await activity.update(.init(state: state, staleDate: nil))
+        let content = ActivityContent(state: state, staleDate: nil)
+        Task {
+            await activity.update(content)
+        }
         #endif
     }
 
-    public func end() async {
+    public func end() {
         #if canImport(ActivityKit) && os(iOS)
-        await activity?.end(nil, dismissalPolicy: .immediate)
-        activity = nil
+        guard let activity = self.activity else { return }
+        self.activity = nil
+        Task {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
         #endif
     }
 }

@@ -38,7 +38,7 @@ public final class FocusTimerViewModel {
             onFinish: { [weak self] in
                 Task { @MainActor in
                     self?.isRunning = false
-                    await self?.activityController.end()
+                    self?.activityController.end()
                 }
             }
         )
@@ -52,7 +52,7 @@ public final class FocusTimerViewModel {
         isRunning = false
         Task {
             await engine?.pause()
-            await activityController.pause(currentRemainingDate: Date().addingTimeInterval(TimeInterval(remainingSeconds)))
+            activityController.pause(currentRemainingDate: Date().addingTimeInterval(TimeInterval(remainingSeconds)))
         }
     }
 
@@ -61,7 +61,7 @@ public final class FocusTimerViewModel {
         remainingSeconds = durationMinutes * 60
         Task {
             await engine?.reset(to: remainingSeconds)
-            await activityController.end()
+            activityController.end()
         }
     }
 
