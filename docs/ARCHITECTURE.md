@@ -39,7 +39,7 @@ Regla de dependencia: `Presentation → Domain ← Data`, `Presentation → AIKi
 
 ```swift
 enum FocalSchemaV1: VersionedSchema {
-    static var versionIdentifier = Schema.Version(1, 0, 0)
+    static let versionIdentifier = Schema.Version(1, 0, 0)
     static var models: [any PersistentModel.Type] {
         [DailyPlan.self, TimeBlock.self, TaskItem.self, BrainDumpEntry.self]
     }

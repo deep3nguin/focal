@@ -2,7 +2,7 @@ import SwiftData
 import Foundation
 
 public enum FocalSchemaV1: VersionedSchema {
-    public static var versionIdentifier = Schema.Version(1, 0, 0)
+    public static let versionIdentifier = Schema.Version(1, 0, 0)
     public static var models: [any PersistentModel.Type] {
         [DailyPlan.self, TimeBlock.self, TaskItem.self, BrainDumpEntry.self]
     }
