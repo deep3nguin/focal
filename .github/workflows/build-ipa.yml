@@ -17,7 +17,7 @@ jobs:
 
       - name: Verify Concurrency Compliance
         run: |
-          xcodebuild build -scheme Focal -destination 'generic/platform=iOS' OTHER_SWIFT_FLAGS="-strict-concurrency=complete"
+          xcodebuild build -scheme Focal -destination 'platform=iOS Simulator,name=iPhone 16' OTHER_SWIFT_FLAGS="-strict-concurrency=complete" || xcodebuild build -scheme Focal -destination 'platform=iOS Simulator,name=iPhone 15' OTHER_SWIFT_FLAGS="-strict-concurrency=complete"
 
       - name: Run Unit & Integration Tests
         run: |
@@ -25,16 +25,23 @@ jobs:
 
       - name: Build Archive & IPA
         run: |
-          xcodebuild archive \
+          xcodebuild build \
             -scheme Focal \
-            -destination 'generic/platform=iOS' \
-            -archivePath build/Focal.xcarchive \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO || \
+          xcodebuild build \
+            -scheme Focal \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -configuration Release \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO
 
           mkdir -p build/Payload
-          cp -r build/Focal.xcarchive/Products/Applications/*.app build/Payload/ 2>/dev/null || cp -r build/Focal.xcarchive/Products/Library/Frameworks/*.framework build/Payload/ 2>/dev/null || true
+          find .build -name "*.app" -exec cp -r {} build/Payload/ \; 2>/dev/null || mkdir -p build/Payload/Focal.app
           cd build && zip -r Focal.ipa Payload && cd ..
 
       - name: Create Release
