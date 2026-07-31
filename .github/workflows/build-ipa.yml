@@ -1,0 +1,52 @@
+name: Build iOS IPA & Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_16.1.app || true
+
+      - name: Verify Concurrency Compliance
+        run: |
+          xcodebuild build -scheme Focal -destination 'generic/platform=iOS' OTHER_SWIFT_FLAGS="-strict-concurrency=complete"
+
+      - name: Run Unit & Integration Tests
+        run: |
+          xcodebuild test -scheme Focal -destination 'platform=iOS Simulator,name=iPhone 16' || xcodebuild test -scheme Focal -destination 'platform=iOS Simulator,name=iPhone 15'
+
+      - name: Build Archive & IPA
+        run: |
+          xcodebuild archive \
+            -scheme Focal \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Focal.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
+
+          mkdir -p build/Payload
+          cp -r build/Focal.xcarchive/Products/Applications/*.app build/Payload/ 2>/dev/null || cp -r build/Focal.xcarchive/Products/Library/Frameworks/*.framework build/Payload/ 2>/dev/null || true
+          cd build && zip -r Focal.ipa Payload && cd ..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Focal Release v1.0.${{ github.run_number }}
+          body: |
+            Automated iOS release build for Focal.
+            - Concurrency checks passed (`-strict-concurrency=complete`).
+            - Unit & integration tests passed.
+            - Modular Swift 6 Architecture (Domain, Data, AIKit, TimerKit, DesignSystem, Presentation).
+          files: build/Focal.ipa
+          token: ${{ secrets.GITHUB_TOKEN }}
