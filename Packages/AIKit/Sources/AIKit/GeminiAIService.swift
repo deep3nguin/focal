@@ -71,18 +71,20 @@ public final class GeminiAIService: AIServiceProtocol, Sendable {
         }
     }
 
-    private static let taskListSchema: [String: Any] = [
-        "type": "ARRAY",
-        "items": [
-            "type": "OBJECT",
-            "properties": [
-                "title": ["type": "STRING"],
-                "suggestedStartTime": ["type": "STRING", "nullable": true],
-                "estimatedMinutes": ["type": "INTEGER", "nullable": true]
-            ],
-            "required": ["title"]
+    private static var taskListSchema: [String: Any] {
+        [
+            "type": "ARRAY",
+            "items": [
+                "type": "OBJECT",
+                "properties": [
+                    "title": ["type": "STRING"],
+                    "suggestedStartTime": ["type": "STRING", "nullable": true],
+                    "estimatedMinutes": ["type": "INTEGER", "nullable": true]
+                ],
+                "required": ["title"]
+            ]
         ]
-    ]
+    }
 }
 
 private struct GeminiEnvelope: Decodable {
