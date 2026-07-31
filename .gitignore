@@ -1,0 +1,16 @@
+# OS / macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode / Swift
+build/
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+.swiftpm/
+.build/
+
+# Secrets
+*.xcconfig
+.env*
