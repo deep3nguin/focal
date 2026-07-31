@@ -5,7 +5,9 @@ import Data
 public struct FocalApp: App {
     @StateObject private var container = AppDependencyContainer()
 
-    var body: some Scene {
+    public init() {}
+
+    public var body: some Scene {
         WindowGroup {
             MainTabView(container: container)
                 .modelContainer(SwiftDataStack.container)
