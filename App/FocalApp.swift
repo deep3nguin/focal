@@ -2,8 +2,7 @@ import SwiftUI
 import SwiftData
 import Data
 
-@main
-struct FocalApp: App {
+public struct FocalApp: App {
     @StateObject private var container = AppDependencyContainer()
 
     var body: some Scene {
