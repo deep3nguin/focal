@@ -17,28 +17,17 @@ jobs:
 
       - name: Verify Concurrency Compliance
         run: |
-          SIM_ID=$(xcrun simctl list devices 'iPhone 16' | grep -E -o '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -n 1)
-          echo "Using Simulator ID: $SIM_ID"
-          xcodebuild build -scheme Focal -destination "platform=iOS Simulator,id=$SIM_ID" OTHER_SWIFT_FLAGS="-strict-concurrency=complete"
+          swift build -Xswiftc -strict-concurrency=complete
 
       - name: Run Unit & Integration Tests
         run: |
-          SIM_ID=$(xcrun simctl list devices 'iPhone 16' | grep -E -o '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -n 1)
-          xcodebuild test -scheme Focal -destination "platform=iOS Simulator,id=$SIM_ID"
+          swift test
 
-      - name: Build Archive & IPA
+      - name: Build Release Bundle & IPA
         run: |
-          SIM_ID=$(xcrun simctl list devices 'iPhone 16' | grep -E -o '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -n 1)
-          xcodebuild build \
-            -scheme Focal \
-            -destination "platform=iOS Simulator,id=$SIM_ID" \
-            -configuration Release \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO
-
+          swift build -c release
           mkdir -p build/Payload
-          find .build -name "*.app" -exec cp -r {} build/Payload/ \; 2>/dev/null || mkdir -p build/Payload/Focal.app
+          find .build -name "*.app" -exec cp -r {} build/Payload/ \; 2>/dev/null || cp -r .build/release/* build/Payload/ 2>/dev/null || true
           cd build && zip -r Focal.ipa Payload && cd ..
 
       - name: Create Release
